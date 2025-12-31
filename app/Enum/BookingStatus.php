@@ -4,18 +4,20 @@ namespace App\Enum;
 
 enum BookingStatus: string
 {
-    case Pending = 'pending';
-    case Confirmed = 'confirmed';
-    case Cancelled = 'cancelled';
-    case Completed = 'completed';
+    case PENDING = 'pending';
+    case CONFIRMED = 'confirmed';
+    case CANCELLED = 'cancelled';
+    case PARTIAL = 'partially_completed';
+    case COMPLETED = 'completed';
 
     public function label(): string
     {
-        return match($this) {
-            self::Pending => 'Pending',
-            self::Confirmed => 'Confirmed',
-            self::Cancelled => 'Cancelled',
-            self::Completed => 'Completed',
+        return match ($this) {
+            self::PENDING => 'Pending',
+            self::CONFIRMED => 'Confirmed',
+            self::CANCELLED => 'Cancelled',
+            self::PARTIAL => 'Partially Completed',
+            self::COMPLETED => 'Completed',
         };
     }
 

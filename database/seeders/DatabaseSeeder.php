@@ -23,10 +23,21 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Admin User',
-            'email' => 'admmin@timdtech.com',
-            'password' => bcrypt('password'), // password
+            'email' => 'sa@timdtech.com',
+            'password' => bcrypt('Sa@timdtech.com123'), // password
             'type' => 'backend',
             'is_active' => true,
         ]);
+
+        $this->call(UserRoleSeeder::class);
+        $this->call(PermissionSeeder::class);
+        $this->call(FAQSeeder::class);
+        $this->call(TestCategorySeeder::class);
+        $this->call(TestSeeder::class);
+
+        $this->call(SubscriptionPlanSeeder::class);
+        $this->call(SubscriptionPlanFeatureSeeder::class);
+        // $this->call(DemoUserSubscriptionSeeder::class);
+
     }
 }

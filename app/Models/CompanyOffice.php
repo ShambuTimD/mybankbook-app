@@ -17,6 +17,7 @@ class CompanyOffice extends Model
         'state',
         'country',
         'pincode',
+        'allowed_collection_mode',
         'status',
         'created_by',
         'created_on',

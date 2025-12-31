@@ -6,8 +6,10 @@ use App\Models\CompanyUser;
 use App\Models\Company;
 use App\Models\CompanyOffice;
 use App\Models\Role;
+use App\Rules\AllowedCollectionMode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Yajra\DataTables\DataTables;
@@ -35,15 +37,16 @@ class CompanyUserController extends Controller
                     'phone',
                     'role_id',
                     'status',
+                    'last_login',
                     'created_on as created_at',
                 ]);
 
             return DataTables::of($query)
                 ->addIndexColumn()
-                ->addColumn('company', fn ($row) => $row->company->name ?? '-')
-                ->addColumn('role', fn ($row) => $row->role->role_title ?? '-')
-                ->addColumn('office', fn ($row) => $row->office_names ?: '-') // accessor on model
-                ->addColumn('action', fn () => '') // handled in React
+                ->addColumn('company', fn($row) => $row->company->name ?? '-')
+                ->addColumn('role', fn($row) => $row->role->role_title ?? '-')
+                ->addColumn('office', fn($row) => $row->office_names ?: '-') // accessor on model
+                ->addColumn('action', fn() => '') // handled in React
                 ->make(true);
         }
 
@@ -74,6 +77,7 @@ class CompanyUserController extends Controller
             'status'              => 'required|in:active,inactive',
             'is_primary'          => 'nullable|boolean',
             'is_tester'           => 'nullable|boolean',
+            'allowed_collection_mode' => ['nullable', new AllowedCollectionMode],  // Apply the custom rule
         ]);
 
         $role = Role::find($validated['role_id']);
@@ -84,8 +88,9 @@ class CompanyUserController extends Controller
             ]);
         }
 
-        if (!empty($validated['company_office_id'])) {
-            $validated['company_office_id'] = implode(',', $validated['company_office_id']);
+        // Convert allowed_collection_mode array to a comma-separated string for storage
+        if (!empty($validated['allowed_collection_mode'])) {
+            $validated['allowed_collection_mode'] = implode(',', $validated['allowed_collection_mode']);
         }
 
         $validated['password']   = Hash::make($validated['password']);
@@ -99,6 +104,8 @@ class CompanyUserController extends Controller
             ->route('companyUser.index')
             ->with('success', 'Company user created successfully.');
     }
+
+
 
     public function edit($id): Response
     {
@@ -136,6 +143,7 @@ class CompanyUserController extends Controller
             'is_primary'          => 'nullable|boolean',
             'is_tester'           => 'nullable|boolean',
             'password'            => 'nullable|string|min:6', // password optional on edit
+            'allowed_collection_mode' => ['nullable', new AllowedCollectionMode], // Apply the custom rule
         ]);
 
         // Conditional requirement: roles that must have office(s)
@@ -147,10 +155,10 @@ class CompanyUserController extends Controller
             ]);
         }
 
-        // implode array -> CSV string for storage
-        if (array_key_exists('company_office_id', $validated)) {
-            $validated['company_office_id'] = !empty($validated['company_office_id'])
-                ? implode(',', $validated['company_office_id'])
+        // Convert allowed_collection_mode array to a comma-separated string for storage
+        if (array_key_exists('allowed_collection_mode', $validated)) {
+            $validated['allowed_collection_mode'] = !empty($validated['allowed_collection_mode'])
+                ? implode(',', $validated['allowed_collection_mode'])
                 : null;
         }
 
@@ -181,6 +189,27 @@ class CompanyUserController extends Controller
         return response()->json([
             'success' => true,
             'status'  => $companyUser->status,
+        ]);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $hasOffices = DB::table('timd_hpbms_booking_master')
+            ->where('office_id', $id)
+            ->exists();
+
+        if ($hasOffices) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete this user. Booking exist for this user.'
+            ], 422);
+        }
+
+        CompanyUser::destroy($id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully'
         ]);
     }
 }

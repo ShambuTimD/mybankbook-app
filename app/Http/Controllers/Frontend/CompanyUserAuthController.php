@@ -28,16 +28,25 @@ class CompanyUserAuthController extends Controller
             ], 422);
         }
 
-        // ✅ Get user with relations
+        // ✅ Fetch user
         $user = CompanyUser::with(['company', 'role'])
             ->where('email', $request->email)
             ->first();
 
+        // Case: invalid credentials
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid credentials',
+                'message' => 'Invalid Credentials. Please check your credentials, and try again.',
             ], 401);
+        }
+
+        // Case: inactive/blocked account
+        if ($user->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Account inactive or blocked. Please contact support.',
+            ], 403);
         }
 
         // ✅ Generate token
@@ -46,25 +55,36 @@ class CompanyUserAuthController extends Controller
         // ✅ Get company
         $company = $user->company;
 
-        // ✅ Offices logic by role
+        // ✅ Get offices
         $offices = collect();
-
         if ($user->role && strtolower($user->role->role_name) === 'company_admin') {
-            // Company Admin → all active offices of the company
             $offices = CompanyOffice::where('company_id', $company->id)
                 ->where('status', 'active')
                 ->get();
         } elseif ($user->role && strtolower($user->role->role_name) === 'company_executive') {
-            // Company Executive → only allocated offices
-            $officeIds = $user->company_office_id; // accessor returns array
+            $officeIds = $user->company_office_id;
             $offices = CompanyOffice::whereIn('id', $officeIds)
                 ->where('status', 'active')
                 ->get();
         }
 
+        $offices = $offices->map(function ($office) {
+            return [
+                'office_id'       => $office->id,
+                'office_name'     => $office->office_name,
+                'collection_mode' => $office->allowed_collection_mode,
+                'address'         => $office->address_line_1,
+                'status'          => $office->status,
+            ];
+        });
+
+        $user->last_login = Carbon::now();
+        $user->save();
+
+        // ✅ Success response
         return response()->json([
             'success' => true,
-            'message' => 'Login Successful',
+            'message' => 'Login successful',
             'user' => [
                 'id'           => $user->id,
                 'first_name'   => $user->name,
@@ -80,25 +100,79 @@ class CompanyUserAuthController extends Controller
                 'token'        => $token,
                 'is_primary'   => (bool) $user->is_primary,
                 'is_tester'    => (bool) $user->is_tester,
-                // 👇 send office_ids array directly
                 'office_ids'   => $user->company_office_id,
+                'status'       => $user->status,
             ],
             'company_and_offices' => [
                 'company_id'     => $company->id ?? null,
                 'company_name'   => $company->name ?? '',
                 'logo'           => $company?->logo ? asset('storage/' . $company->logo) : null,
                 'company_status' => $company->status ?? 'active',
-                'offices'        => $offices->map(function ($office) {
-                    return [
-                        'office_id'   => $office->id,
-                        'office_name' => $office->office_name,
-                        'address'     => $office->address_line_1 ?? '',
-                        'status'      => $office->status ?? 'active',
-                    ];
-                }),
+                'offices'        => $offices,
             ]
         ]);
     }
+    public function updateProfile(Request $request)
+{
+    $user = $request->user();
+
+    $validated = $request->validate([
+        'name'        => 'required|string|max:255',
+        'email'       => 'required|email',
+        'phone'       => 'nullable|string|max:20',
+        'designation' => 'nullable|string|max:255',
+        'status'      => 'nullable|string|max:50',
+        'password'    => 'nullable|string|min:6|confirmed',
+    ]);
+
+    if (!empty($validated['password'])) {
+        $validated['password'] = Hash::make($validated['password']);
+    } else {
+        unset($validated['password']);
+    }
+
+    // Prevent company_id and office_ids modification
+    unset($validated['company_id'], $validated['company_office_id']);
+
+    $user->update($validated);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Profile updated successfully.',
+        'data'    => $user,
+    ]);
+}
+
+
+    public function details(Request $request)
+{
+    $user = $request->user();
+
+    $company = \App\Models\Company::select('id', 'name')->find($user->company_id);
+    $offices = \App\Models\CompanyOffice::whereIn('id', (array) $user->company_office_id)
+        ->select('id', 'office_name')
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'User details fetched successfully',
+        'data'    => [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'designation' => $user->designation,
+            'status' => $user->status,
+            'company' => [
+                'id' => $company->id ?? null,
+                'name' => $company->name ?? '-',
+            ],
+            'offices' => $offices,
+        ],
+    ]);
+}
+
+
 
     public function logout(Request $request)
     {

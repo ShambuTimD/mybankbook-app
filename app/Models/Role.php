@@ -18,7 +18,7 @@ class Role extends Model
     ];
 
     public function permissions(){
-        return $this->hasMany(Permission::class,'role_id','id');
+        return $this->hasMany(Permission::class,'role_id');
     }
 
     public function checkPermission($route_name)

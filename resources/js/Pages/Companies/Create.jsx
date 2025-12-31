@@ -1,6 +1,4 @@
-//import { useForm } from '@inertiajs/react';
 import { useForm, Head } from "@inertiajs/react";
-import { useState } from "react";
 import ComponentCard from "@/Components/common/ComponentCard";
 import Label from "@/Components/form/Label";
 import Input from "@/Components/form/input/InputField";
@@ -9,6 +7,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 export default function CreateCompany() {
     const { data, setData, post, processing, errors } = useForm({
         name: "",
+        short_name: "",
         email: "",
         phone: "",
         alternate_phone: "",
@@ -22,46 +21,57 @@ export default function CreateCompany() {
         address_line_2: "",
         city: "",
         state: "",
-        country: "",
+        country: "India",
         pincode: "",
         logo: null,
         status: "active",
     });
 
     const handleSubmit = (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    // Map each form key to its readable label
-    const requiredFields = {
-        name: "Company Name",
-        phone: "Phone",
-        email: "Email",
-        address_line_1: "Address Line 1",
-        city: "City",
-        state: "State",
-        country: "Country",
-        pincode: "Pincode",
-        status: "Status"
+        const requiredFields = {
+            name: "Company Name",
+            short_name: "Short Name",
+            status: "Status",
+        };
+
+        const missingFields = Object.entries(requiredFields)
+            .filter(([key]) => !data[key] || data[key].toString().trim() === "")
+            .map(([_, label]) => label);
+
+        if (missingFields.length > 0) {
+            alert(
+                "Please fill the following fields:\n" + missingFields.join("\n")
+            );
+            return;
+        }
+
+        // ✅ Fill N/A only for optional fields (exclude email & phone)
+        const cleanedData = { ...data };
+        Object.keys(cleanedData).forEach((key) => {
+            if (
+                ![
+                    "name",
+                    "short_name",
+                    "status",
+                    "logo",
+                    "email",
+                    "phone",
+                ].includes(key) &&
+                (!cleanedData[key] || cleanedData[key].toString().trim() === "")
+            ) {
+                cleanedData[key] = "N/A";
+            }
+        });
+
+        setData(cleanedData);
+
+        post(route("companies.store"), {
+            preserveScroll: true,
+            forceFormData: true,
+        });
     };
-
-    // Find which required fields are missing
-    const missingFields = Object.entries(requiredFields)
-        .filter(([key]) => !data[key] || data[key].toString().trim() === "")
-        .map(([_, label]) => label);
-
-    if (missingFields.length > 0) {
-        alert("Please fill the following fields:\n" + missingFields.join("\n"));
-        return;
-    }
-
-    // Submit if all required fields are filled
-    post(route("companies.store"), {
-        preserveScroll: true,
-        forceFormData: true,
-    });
-};
-
-
 
     return (
         <>
@@ -78,7 +88,9 @@ export default function CreateCompany() {
                 >
                     {/* Name */}
                     <div>
-                        <Label htmlFor="name">Company Name<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="name">
+                            Company Name<span className="text-red-500">*</span>
+                        </Label>
                         <Input
                             id="name"
                             value={data.name}
@@ -92,9 +104,29 @@ export default function CreateCompany() {
                         )}
                     </div>
 
+                    {/* Short Name */}
+                    <div>
+                        <Label htmlFor="short_name">
+                            Short Name<span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                            id="short_name"
+                            value={data.short_name}
+                            onChange={(e) =>
+                                setData("short_name", e.target.value)
+                            }
+                            placeholder="Enter short name"
+                        />
+                        {errors.short_name && (
+                            <p className="text-red-500 text-xs">
+                                {errors.short_name}
+                            </p>
+                        )}
+                    </div>
+
                     {/* Email */}
                     <div>
-                        <Label htmlFor="email">Email<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="email">Email</Label>
                         <Input
                             id="email"
                             type="email"
@@ -111,20 +143,12 @@ export default function CreateCompany() {
 
                     {/* Phone */}
                     <div>
-                        <Label htmlFor="phone">Phone<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="phone">Phone</Label>
                         <Input
                             id="phone"
                             value={data.phone}
-                            type="tel"
-                            onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
-                                if (value.length <= 10) {
-                                    setData("phone", value);
-                                }
-                            }}
-                            placeholder="Enter primary phone"
-                            inputMode="numeric"
-                            maxLength={10}
+                            onChange={(e) => setData("phone", e.target.value)}
+                            placeholder="Enter phone"
                         />
                         {errors.phone && (
                             <p className="text-red-500 text-xs">
@@ -139,16 +163,10 @@ export default function CreateCompany() {
                         <Input
                             id="alternate_phone"
                             value={data.alternate_phone}
-                            type="tel"
-                            onChange={(e) => {
-                                const value = e.target.value.replace(/\D/g, ""); // Remove non-digit characters
-                                if (value.length <= 10) {
-                                    setData("alternate_phone", value);
-                                }
-                            }}
+                            onChange={(e) =>
+                                setData("alternate_phone", e.target.value)
+                            }
                             placeholder="Enter alternate phone"
-                            inputMode="numeric"
-                            maxLength={10}
                         />
                         {errors.alternate_phone && (
                             <p className="text-red-500 text-xs">
@@ -267,7 +285,7 @@ export default function CreateCompany() {
 
                     {/* Address Line 1 */}
                     <div>
-                        <Label htmlFor="address_line_1">Address Line 1<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="address_line_1">Address Line 1</Label>
                         <Input
                             id="address_line_1"
                             value={data.address_line_1}
@@ -303,7 +321,7 @@ export default function CreateCompany() {
 
                     {/* City */}
                     <div>
-                        <Label htmlFor="city">City<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="city">City</Label>
                         <Input
                             id="city"
                             value={data.city}
@@ -319,7 +337,7 @@ export default function CreateCompany() {
 
                     {/* State */}
                     <div>
-                        <Label htmlFor="state">State<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="state">State</Label>
                         <Input
                             id="state"
                             value={data.state}
@@ -335,7 +353,7 @@ export default function CreateCompany() {
 
                     {/* Country */}
                     <div>
-                        <Label htmlFor="country">Country<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="country">Country</Label>
                         <Input
                             id="country"
                             value={data.country}
@@ -351,7 +369,7 @@ export default function CreateCompany() {
 
                     {/* Pincode */}
                     <div>
-                        <Label htmlFor="pincode">Pincode<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="pincode">Pincode</Label>
                         <Input
                             id="pincode"
                             value={data.pincode}
@@ -384,7 +402,9 @@ export default function CreateCompany() {
 
                     {/* Status */}
                     <div>
-                        <Label htmlFor="status">Status<span className="text-red-500">*</span></Label>
+                        <Label htmlFor="status">
+                            Status<span className="text-red-500">*</span>
+                        </Label>
                         <select
                             id="status"
                             value={data.status}

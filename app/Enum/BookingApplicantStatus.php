@@ -4,16 +4,20 @@ namespace App\Enum;
 
 enum BookingApplicantStatus: string
 {
-    case Scheduled = 'scheduled';
-    case Attended = 'attended';
-    case Cancelled = 'cancelled';
+    case NOTSTARTED = 'not_started';
+    case SCHEDULED = 'scheduled';
+    case ATTENDED = 'attended';
+    case CANCELLED = 'cancelled';
+    case NO_SHOW = 'no_show';
 
     public function label(): string
     {
         return match($this) {
-            self::Scheduled => 'Scheduled',
-            self::Attended => 'Attended',
-            self::Cancelled => 'Cancelled',
+            self::NOTSTARTED => 'Not Started',
+            self::SCHEDULED => 'Scheduled',
+            self::ATTENDED => 'Attended',
+            self::CANCELLED => 'Cancelled',
+            self::NO_SHOW => 'No Show',
         };
     }
 

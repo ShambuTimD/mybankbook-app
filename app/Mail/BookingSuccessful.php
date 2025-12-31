@@ -91,7 +91,7 @@ class BookingSuccessful extends Mailable implements ShouldQueue
             'emailfooter'      => $pageLinks,
             'signature'        => $commSettings->email_signature ?? '',
         ]);
-        Log::info('Markdown view prepared for BookingSuccessful mail');
+        // Log::info('Markdown view prepared for BookingSuccessful mail');
 
         // if (!empty($this->recipient['email'])) {
         //     $mail->to($this->recipient['email']);

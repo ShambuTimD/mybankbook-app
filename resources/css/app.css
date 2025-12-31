@@ -666,19 +666,7 @@ nav .menu-item-text {
     background: #003563 !important;
 }
 
-.dt-layout-row.dt-layout-table {
-    max-height: 400px;
-    overflow: auto;
-    margin: 0;
-    margin-bottom: 0.5rem;
-    display: flex;
-    margin-top: 30px;
-    align-items: inherit;
-    margin-bottom: 30px;
-    width: 100%;
-}
 
-/* .......02082025....... */
 
 .sorting_1 {
     text-align: center;
@@ -2334,6 +2322,7 @@ input {
 }
 .react-datepicker-popper {
     top: 0 !important;
+    z-index: 50 !important;
 }
 
 ::-webkit-scrollbar {
@@ -2398,6 +2387,10 @@ input {
 }
 .book_success {
     margin-top: 0 !important;
+}
+.foo_ter{
+    position: relative;
+    z-index: 0 !important;
 }
 @media only screen and (max-width: 767px) {
     .top_bar {
@@ -2650,8 +2643,294 @@ body {
     overflow: auto !important;
     margin: 30px 0 !important;
     margin-bottom: 0.5rem !important;
-    display: flex !important
-;
+    display: flex !important;
     align-items: inherit !important;
     width: 100% !important;
+    z-index: 0;
+    position: relative;
+}
+.dt-layout-cell.dt-layout-full{
+  min-height: 300px !important;
+}
+.s_form_padiing textarea{
+    font-size: 16px !important;
+}
+
+.dataTables_wrapper {
+  overflow-x: auto !important;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+}
+::-webkit-scrollbar {
+    height: 8px;
+}
+
+div.dt-container .dt-paging .dt-paging-button.disabled, div.dt-container .dt-paging .dt-paging-button.disabled:hover, div.dt-container .dt-paging .dt-paging-button.disabled:active{
+        border: 1px solid #aaaaaa !important;
+    border-radius: 5px;
+}
+div.dt-container .dt-paging .dt-paging-button.current,
+div.dt-container .dt-paging .dt-paging-button.current:hover 
+{
+    color: #fff !important;
+}
+.dt-paging-button.current{
+    background: #465FFF !important;
+    border-radius: 5px !important;
+    border: 0 !important;
+    color: #fff !important;
+}
+
+table.dataTable th.dt-type-numeric, table.dataTable th.dt-type-date, table.dataTable td.dt-type-numeric, table.dataTable td.dt-type-date {
+    text-align: center;
+        font-weight: 500;
+}
+table.dataTable thead th, table.dataTable thead td, table.dataTable tfoot th, table.dataTable tfoot td {
+    text-align: center;
+        font-weight: 500;
+}
+table.dataTable {
+ 
+    text-align: center;
+}
+div.dt-container .dt-paging .dt-paging-button.current, div.dt-container .dt-paging .dt-paging-button.current:hover{
+    color: #fff !important;
+}
+table.dataTable > thead > tr > th, table.dataTable > thead > tr > td {
+    text-align: center;
+}
+table.dataTable th.dt-type-numeric, table.dataTable th.dt-type-date, table.dataTable td.dt-type-numeric, table.dataTable td.dt-type-date
+ {
+    text-align: center;
+}
+.dt-paging-button.current{
+    color: #fff !important;
+}
+
+.dt-scroll-body{
+    min-height: 254px;
+}
+.dataTable td {
+  vertical-align: middle !important;
+}
+/* Card-style DataTable rows */
+table.dataTable tbody tr {
+    background: #fffbe8 !important;
+    border-radius: 12px !important;
+    margin-bottom: 10px !important;
+    border: 1px solid #f1e8c5 !important;
+}
+table.dataTable tbody tr {
+    background-color: #ffffff !important;
+}
+/* ===========================================
+   GLOBAL REACT-SELECT HEIGHT FIX
+   Works with classNamePrefix="rselect"
+   =========================================== */
+
+.rselect__control {
+    min-height: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    align-items: center !important; /* This vertically centers the content */
+}
+
+/* Fix the container that holds the text */
+.rselect__value-container {
+    height: 36px !important;
+    padding: 0 8px !important; /* Remove top/bottom padding, keep side padding */
+    display: flex !important;
+    align-items: center !important; /* Force vertical centering */
+    flex-wrap: nowrap !important;
+}
+
+/* Reset text positioning */
+.rselect__single-value,
+.rselect__placeholder {
+    position: relative !important;
+    top: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    line-height: normal !important; /* Reset fixed line-height */
+}
+
+/* Dropdown inside portal */
+.rselect__menu {
+    z-index: 999999 !important;
+}
+
+.rselect__menu-list {
+    padding-top: 0 !important;                  
+    padding-bottom: 0 !important;
+}
+
+/* ✅ CRITICAL FIX: Override your global input padding styles */
+/* Your global 'input' style adds 5px top and 8px bottom padding, 
+   which pushes the react-select input cursor weirdly. We reset it here. */
+.rselect__input-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.rselect__input-container input {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    height: auto !important;
+}
+/* Remove bold from DataTable headers */
+table.dataTable thead th {
+    font-weight: normal !important;
+}
+.loader {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #ddd;
+    border-top-color: #3498db;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+/* GLOBAL DataTable Topbar Alignment */
+
+.dt-wrapper-relative {
+    position: relative;
+    width: 100%;
+}
+
+/* Position the Search Box Absolute Right */
+.dt-custom-search-box {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+}
+
+/* Align standard DataTables 'Entries' dropdown */
+.dataTables_wrapper .dataTables_length {
+    float: left !important;
+    margin-bottom: 1rem; /* Space between dropdown and table */
+    display: flex;
+    align-items: center;
+    height: 38px; /* Matches the height of your Search Input */
+}
+
+/* Optional: Make the default select look a bit nicer/aligned */
+.dataTables_wrapper .dataTables_length select {
+    margin: 0 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 4px;
+    border: 1px solid #d1d5db; /* Tailwind gray-300 */
+}
+.dt-length {
+margin-top: 25px;
+margin-bottom: 25px;
+}
+/* Remove default accordion arrow */
+summary::-webkit-details-marker {
+    display: none !important;
+}
+
+/* Rotate icon when <details> is open */
+details[open] > summary .summary-icon {
+    transform: rotate(180deg);
+}
+/* ================================
+   CKEditor – RMS Notes Styling
+   ================================ */
+
+/* Editor wrapper */
+.ck.ck-editor {
+    width: 100%;
+    font-family: inherit;
+}
+
+/* Toolbar */
+.ck.ck-toolbar {
+    padding: 4px 6px;
+    border-radius: 6px 6px 0 0;
+    background: #f9fafb;
+}
+
+/* Toolbar buttons */
+.ck.ck-toolbar .ck-button {
+    min-width: 28px;
+    height: 28px;
+}
+
+/* Editable area (MAIN FIXES HERE) */
+.ck-editor__editable,
+.ck-editor__editable_inline {
+    min-height: 120px;              /* Comfortable typing */
+    max-height: 200px;              /* Prevent modal overflow */
+    padding: 8px 10px;
+
+    font-size: 13px;
+    line-height: 1.5;
+    color: #111827;
+
+    /* 🔥 WORD WRAPPING FIX */
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+
+    overflow-y: auto;               /* Scroll inside editor if long */
+}
+
+/* Focus state */
+.ck-editor__editable:focus {
+    outline: none;
+    border-color: #2563eb;           /* Blue focus */
+    box-shadow: 0 0 0 1px #2563eb;
+}
+
+/* Placeholder text */
+.ck.ck-editor__editable.ck-placeholder::before {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+/* Remove "Powered by CKEditor" badge */
+.ck.ck-powered-by {
+    display: none !important;
+}
+
+/* Tables inside notes (if pasted) */
+.ck-editor__editable table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.ck-editor__editable table td,
+.ck-editor__editable table th {
+    border: 1px solid #d1d5db;
+    padding: 6px;
+}
+
+/* Lists spacing */
+.ck-editor__editable ul,
+.ck-editor__editable ol {
+    padding-left: 20px;
+}
+
+/* Prevent CKEditor breaking table layout */
+td .ck.ck-editor {
+    max-width: 100%;
+}
+
+/* Mobile safety */
+@media (max-width: 640px) {
+    .ck-editor__editable {
+        min-height: 100px;
+        font-size: 12px;
+    }
 }

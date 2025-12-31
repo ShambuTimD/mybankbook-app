@@ -18,7 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->api([\Rakutentech\LaravelRequestDocs\LaravelRequestDocsMiddleware::class]);
 
-        //
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'permission' => \App\Http\Middleware\PermissionCheck::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

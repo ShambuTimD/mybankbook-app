@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Company;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Yajra\DataTables\DataTables;
@@ -14,6 +15,7 @@ class CompanyController extends Controller
     {
         return Inertia::render('Companies/Index', [
             'title' => 'Company',
+            // 'flash' => session()->only(['success', 'error']), // Pass flash data
         ]);
     }
 
@@ -32,29 +34,45 @@ class CompanyController extends Controller
 
     //     abort(403);
     // }
-    public function list(Request $request)
+   public function list(Request $request)
 {
     if ($request->wantsJson() || $request->ajax()) {
         $data = Company::orderBy('created_on', 'desc')
             ->select([
                 'id',
                 'name',
-                'email',
+                'short_name',
                 'logo',
+                'email',
+                'phone',
+                'alternate_phone',
+                'website',
+                'gst_number',
+                'pan_number',
+                'industry_type',
+                'company_size',
+                'registration_type',
+                'address_line_1',
+                'address_line_2',
+                'city',
+                'state',
+                'country',
+                'pincode',
                 'status',
-                'created_on as created_at' // alias if needed by DataTable
+                'created_on as created_at'
             ]);
 
         return DataTables::of($data)
             ->addIndexColumn()
             ->addColumn('action', function ($row) {
-                return ''; // handled in React via slot
+                return ''; // React handles UI buttons
             })
             ->make(true);
     }
 
     abort(403);
 }
+
 
 
     public function create(): Response
@@ -64,42 +82,49 @@ class CompanyController extends Controller
         ]);
     }
 
-  public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'short_name' => 'nullable|string|max:50',
-        'email' => 'required|email|max:255',
-        'phone' => 'required|string|max:20',
-        'alternate_phone' => 'nullable|string|max:20',
-        'website' => 'nullable|string|max:255',
-        'gst_number' => 'nullable|string|max:50',
-        'pan_number' => 'nullable|string|max:50',
-        'industry_type' => 'nullable|string|max:100',
-        'company_size' => 'nullable|string|max:100',
-        'registration_type' => 'nullable|string|max:100',
-        'address_line_1' => 'required|string|max:255',
-        'address_line_2' => 'nullable|string|max:255',
-        'city' => 'required|string|max:100',
-        'state' => 'required|string|max:100',
-        'country' => 'required|string|max:100',
-        'pincode' => 'required|string|max:20',
-        'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'status' => 'required|in:active,inactive',
-    ]);
-     if (empty($validated['short_name']) && !empty($validated['name'])) {
-        $validated['short_name'] = strtoupper(substr($validated['name'], 0, 3));
-    }
-    // Handle logo upload
-    if ($request->hasFile('logo')) {
-        $path = $request->file('logo')->store('uploads/logos', 'public');
-        $validated['logo'] = $path;
-    }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'short_name' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'alternate_phone' => 'nullable|string|max:20',
+            'website' => 'nullable|string|max:255',
+            'gst_number' => 'nullable|string|max:50',
+            'pan_number' => 'nullable|string|max:50',
+            'industry_type' => 'nullable|string|max:100',
+            'company_size' => 'nullable|string|max:100',
+            'registration_type' => 'nullable|string|max:100',
+            'address_line_1' => 'nullable|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'country' => 'nullable|string|max:100',
+            'pincode' => 'nullable|string|max:20',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'status' => 'required|in:active,inactive',
+        ]);
+        if (empty($validated['short_name']) && !empty($validated['name'])) {
+            $validated['short_name'] = strtoupper(substr($validated['name'], 0, 3));
+        }
+        // Handle logo upload
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('uploads/logos', 'public');
+            $validated['logo'] = $path;
+        }
 
-    Company::create($validated);
+        // Company::create($validated);
 
-    return redirect()->route('companies.index')->with('success', 'Company created successfully');
-}
+        // return redirect()->route('companies.index')->with('success', 'Company created successfully');
+
+        try {
+            Company::create($validated);
+            return redirect()->route('companies.index')->with('success', 'Company created successfully');
+        } catch (\Exception $e) {
+            return redirect()->route('companies.index')->with('error', 'Failed to create company');
+        }
+    }
 
 
     public function show($id): Response
@@ -123,49 +148,78 @@ class CompanyController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $company = Company::findOrFail($id);
+    {
+        $company = Company::findOrFail($id);
 
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
-        'phone' => 'required|string|max:20',
-        'alternate_phone' => 'nullable|string|max:20',
-        'website' => 'nullable|string|max:255',
-        'gst_number' => 'nullable|string|max:50',
-        'pan_number' => 'nullable|string|max:50',
-        'industry_type' => 'nullable|string|max:100',
-        'company_size' => 'nullable|string|max:100',
-        'registration_type' => 'nullable|string|max:100',
-        'address_line_1' => 'required|string|max:255',
-        'address_line_2' => 'nullable|string|max:255',
-        'city' => 'required|string|max:100',
-        'state' => 'required|string|max:100',
-        'country' => 'required|string|max:100',
-        'pincode' => 'required|string|max:20',
-        'status' => 'required|in:active,inactive',
-        'logo' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg|max:2048',
-    ]);
+        // ✅ Same validation as store()
+        $validated = $request->validate([
+            'name'              => 'required|string|max:255',
+            'short_name'        => 'nullable|string|max:50',
+            'email'             => 'nullable|email|max:255',
+            'phone'             => 'nullable|string|max:20',
+            'alternate_phone'   => 'nullable|string|max:20',
+            'website'           => 'nullable|string|max:255',
+            'gst_number'        => 'nullable|string|max:50',
+            'pan_number'        => 'nullable|string|max:50',
+            'industry_type'     => 'nullable|string|max:100',
+            'company_size'      => 'nullable|string|max:100',
+            'registration_type' => 'nullable|string|max:100',
+            'address_line_1'    => 'nullable|string|max:255',
+            'address_line_2'    => 'nullable|string|max:255',
+            'city'              => 'nullable|string|max:100',
+            'state'             => 'nullable|string|max:100',
+            'country'           => 'nullable|string|max:100',
+            'pincode'           => 'nullable|string|max:20',
+            'logo'              => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'status'            => 'required|in:active,inactive',
+        ]);
 
-    // Handle logo upload if a new file is provided
-    if ($request->hasFile('logo')) {
-        $logoPath = $request->file('logo')->store('uploads/logos', 'public');
-        $validated['logo'] = $logoPath;
+        // ✅ Auto-fill short_name just like store()
+        if (empty($validated['short_name']) && !empty($validated['name'])) {
+            $validated['short_name'] = strtoupper(substr($validated['name'], 0, 3));
+        }
+
+        // ✅ Handle logo upload (optional), same as store()
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('uploads/logos', 'public');
+            $validated['logo'] = $path;
+        }
+
+        // $company->update($validated);
+
+        // return redirect()->route('companies.index')->with('success', 'Company updated successfully');
+
+        try {
+            $company->update($validated);
+            return redirect()->route('companies.index')->with('success', 'Company updated successfully');
+        } catch (\Exception $e) {
+            return redirect()->route('companies.index')->with('error', 'Failed to update company details');
+        }
     }
 
-    $company->update($validated);
 
-    return redirect()->route('companies.index')->with('success', 'Company updated successfully');
-}
-
-
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
+        $hasOffices = DB::table('timd_hpbms_comp_offices')
+            ->where('company_id', $id)
+            ->exists();
+
+        if ($hasOffices) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot delete company. Offices exist for this company.'
+            ], 422);
+        }
+
         Company::destroy($id);
 
-        return redirect()->route('companies.index')->with('success', 'Company deleted successfully');
+        return response()->json([
+            'success' => true,
+            'message' => 'Company deleted successfully'
+        ]);
     }
-        public function toggleStatus($id)
+
+    public function toggleStatus($id)
     {
         $company = Company::findOrFail($id);
 
@@ -174,8 +228,8 @@ class CompanyController extends Controller
 
         return response()->json([
             'success' => true,
-            'status' => $company->status
+            'status' => $company->status,
+            'message' => "Status updated to {$company->status}"
         ]);
     }
-
 }

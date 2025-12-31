@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Settings;
+
+use Spatie\LaravelSettings\Settings;
+
+class ReportStatusSettings extends Settings
+{
+
+    public string $app_report_total_reports = 'Reports generated for all attended applicants.';
+    public string $app_report_processing = 'Reports currently being processed and prepared.';
+    public string $app_report_in_qc = 'Reports undergoing Quality Control review before sharing.';
+    public string $app_report_report_shared = 'Reports that have been finalized and shared with the applicant/client.';
+
+    public static function group(): string
+    {
+        return 'report_status';
+    }
+}

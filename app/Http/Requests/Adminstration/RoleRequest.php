@@ -34,7 +34,7 @@ class RoleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string',
+            'role_name' => 'required|string',
             'role_for' => 'required|string',
             'permission' => 'required|array',
             'created_by' => 'required|integer|exists:users,id'

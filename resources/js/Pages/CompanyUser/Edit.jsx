@@ -1,10 +1,11 @@
 // resources/js/Pages/CompanyUser/Edit.jsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useForm, Head } from "@inertiajs/react";
 import ComponentCard from "@/Components/common/ComponentCard";
 import Label from "@/Components/form/Label";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import Select from "react-select";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👈 add icons
 
 export default function EditCompanyUser({
   user,
@@ -43,6 +44,7 @@ export default function EditCompanyUser({
     is_primary: Boolean(user?.is_primary) ?? false,
     is_tester: Boolean(user?.is_tester) ?? false,
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -126,7 +128,7 @@ export default function EditCompanyUser({
       );
       alert(
         "Please fill the following fields:\n" +
-          missing.map((m) => m.label).join("\n")
+        missing.map((m) => m.label).join("\n")
       );
       return;
     }
@@ -166,9 +168,8 @@ export default function EditCompanyUser({
                   name="role_for"
                   value={data.role_for}
                   onChange={handleChange}
-                  className={`form-select w-full ${
-                    errors.role_for ? "border-red-500" : ""
-                  }`}
+                  className={`form-select w-full ${errors.role_for ? "border-red-500" : ""
+                    }`}
                   disabled
                 >
                   <option value="">-- Select Role For --</option>
@@ -187,9 +188,8 @@ export default function EditCompanyUser({
                   name="role_id"
                   value={data.role_id}
                   onChange={handleChange}
-                  className={`form-select w-full ${
-                    errors.role_id ? "border-red-500" : ""
-                  }`}
+                  className={`form-select w-full ${errors.role_id ? "border-red-500" : ""
+                    }`}
                   disabled
                 >
                   <option value="">-- Select Role --</option>
@@ -252,9 +252,8 @@ export default function EditCompanyUser({
                   name="company_id"
                   value={data.company_id}
                   onChange={handleChange}
-                  className={`form-select w-full ${
-                    errors.company_id ? "border-red-500" : ""
-                  }`}
+                  className={`form-select w-full ${errors.company_id ? "border-red-500" : ""
+                    }`}
                   required={requireCompany}
                   disabled
                 >
@@ -271,25 +270,30 @@ export default function EditCompanyUser({
               </div>
 
               {/* EDITABLE multi-select Office field */}
-              <div>
-                <Label htmlFor="company_office_id">
-                  Office {requireOffice && "*"}
-                </Label>
-                <Select
-                  inputId="company_office_id"
-                  isMulti
-                  isClearable
-                  options={officeOptions}
-                  value={selectedOfficeOptions}
-                  onChange={handleOfficeChange}
-                  isDisabled={!data.company_id} // enable only when company chosen
-                  placeholder="Select one or more offices"
-                  classNamePrefix="react-select"
-                />
-                {errors.company_office_id && (
-                  <p className="text-red-500 text-xs">{errors.company_office_id}</p>
-                )}
-              </div>
+              {selectedRoleName !== "company_admin" && (
+                <div>
+                  <Label htmlFor="company_office_id">
+                    Office {requireOffice && "*"}
+                  </Label>
+
+                  <Select
+                    inputId="company_office_id"
+                    isMulti
+                    isClearable
+                    options={officeOptions}
+                    value={selectedOfficeOptions}
+                    onChange={handleOfficeChange}
+                    isDisabled={!data.company_id} // now only disables if no company selected
+                    placeholder="Select one or more offices"
+                    classNamePrefix="react-select"
+                  />
+
+                  {errors.company_office_id && (
+                    <p className="text-red-500 text-xs">{errors.company_office_id}</p>
+                  )}
+                </div>
+              )}
+
 
               <div>
                 <Label htmlFor="name">Name</Label>
@@ -298,9 +302,8 @@ export default function EditCompanyUser({
                   name="name"
                   value={data.name}
                   onChange={handleChange}
-                  className={`form-input w-full ${
-                    errors.name ? "border-red-500" : ""
-                  }`}
+                  className={`form-input w-full ${errors.name ? "border-red-500" : ""
+                    }`}
                   placeholder="Enter full name"
                 />
                 {errors.name && (
@@ -316,9 +319,8 @@ export default function EditCompanyUser({
                   type="email"
                   value={data.email}
                   onChange={handleChange}
-                  className={`form-input w-full ${
-                    errors.email ? "border-red-500" : ""
-                  }`}
+                  className={`form-input w-full ${errors.email ? "border-red-500" : ""
+                    }`}
                   placeholder="Enter email"
                   readOnly
                 />
@@ -328,22 +330,30 @@ export default function EditCompanyUser({
               </div>
 
               <div>
-                <Label htmlFor="password">Password (leave blank to keep)</Label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={data.password}
-                  onChange={handleChange}
-                  className={`form-input w-full ${
-                    errors.password ? "border-red-500" : ""
-                  }`}
-                  placeholder="Enter new password"
-                />
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}   // 👈 toggle type
+                    value={data.password}
+                    onChange={handleChange}
+                    className={`form-input w-full pr-10 ${errors.password ? "border-red-500" : ""}`}
+                    placeholder="Enter new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)} // 👈 toggle state
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-red-500 text-xs">{errors.password}</p>
                 )}
               </div>
+
 
               <div>
                 <Label htmlFor="phone">Phone</Label>
@@ -352,9 +362,8 @@ export default function EditCompanyUser({
                   name="phone"
                   value={data.phone}
                   onChange={handleChange}
-                  className={`form-input w-full ${
-                    errors.phone ? "border-red-500" : ""
-                  }`}
+                  className={`form-input w-full ${errors.phone ? "border-red-500" : ""
+                    }`}
                   placeholder="Enter mobile number"
                 />
                 {errors.phone && (
@@ -369,9 +378,8 @@ export default function EditCompanyUser({
                   name="status"
                   value={data.status}
                   onChange={handleChange}
-                  className={`form-select w-full ${
-                    errors.status ? "border-red-500" : ""
-                  }`}
+                  className={`form-select w-full ${errors.status ? "border-red-500" : ""
+                    }`}
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>

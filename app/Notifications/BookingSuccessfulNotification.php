@@ -19,6 +19,7 @@ class BookingSuccessfulNotification extends Notification implements ShouldQueue
     protected $recipient;
     protected $companyName;
     protected $officeName;
+    protected $officeAddress;
     protected $totalApplicants;
     protected $submissionDate;
     protected $excelRelativePath; // relative to /public
@@ -34,6 +35,7 @@ class BookingSuccessfulNotification extends Notification implements ShouldQueue
         array $recipient,
         string $companyName,
         string $officeName,
+        string $officeAddress,
         int $totalApplicants,
         string $submissionDate,
         string $excelRelativePath,
@@ -45,6 +47,7 @@ class BookingSuccessfulNotification extends Notification implements ShouldQueue
         $this->recipient         = $recipient;
         $this->companyName       = $companyName;
         $this->officeName        = $officeName;
+        $this->officeAddress     = $officeAddress;
         $this->totalApplicants   = $totalApplicants;
         $this->submissionDate    = $submissionDate;
         $this->excelRelativePath = ltrim($excelRelativePath, '/');
@@ -103,6 +106,9 @@ class BookingSuccessfulNotification extends Notification implements ShouldQueue
             ($depCount === 1 ? '1 Dependent' : "{$depCount} Dependents") . ')'
             : (string) ((int) $this->totalApplicants);
 
+        $pref_mode = $this->booking->preferred_collection_mode ;
+        $displayMode = ($pref_mode === 'at_clinic') ? 'At-Clinic' : (($pref_mode === 'at_home') ? 'At-Home' : '');
+
         // Build the message
         $msg = (new MailMessage)
             ->subject($subject)
@@ -111,22 +117,24 @@ class BookingSuccessfulNotification extends Notification implements ShouldQueue
                 $commSettings->email_from_name ?? config('mail.from.name')
             )
             ->markdown('emails.booking.success', [
-                'user_first_name'  => explode(' ', trim($this->recipient['name'] ?? ''))[0] ?? '',
-                'user_full_name'   => $this->recipient['name'] ?? '',
-                'user_role'        => $this->recipient['role'] ?? '',
-                'user_email'       => $this->recipient['email'] ?? '',
-                'user_phone'       => $this->recipient['phone'] ?? '',
-                'booking_ref_no'   => $ref,
-                'booking_status'   => $this->bookingStatus,
-                'company_name'     => $this->companyName,
-                'office_name'      => $this->officeName,
-                'total_applicants' => $totalApplicantsLabel,
-                'submission_date'  => $this->submissionDate,
-                'request_date'     => $this->requestDate,
-                'brand_name'       => config('app.name'),
-                'app_settings'     => $appSettings,
-                'emailfooter'      => $pageLinks,
-                'signature'        => $commSettings->email_signature ?? '',
+                'user_first_name'           => explode(' ', trim($this->recipient['name'] ?? ''))[0] ?? '',
+                'user_full_name'            => $this->recipient['name'] ?? '',
+                'user_role'                 => $this->recipient['role'] ?? '',
+                'user_email'                => $this->recipient['email'] ?? '',
+                'user_phone'                => $this->recipient['phone'] ?? '',
+                'booking_ref_no'            => $ref,
+                'booking_status'            => $this->bookingStatus,
+                'company_name'              => $this->companyName,
+                'office_name'               => $this->officeName,
+                'office_address'            => $this->officeAddress,
+                'pref_collection_mode'      => $displayMode,
+                'total_applicants'          => $totalApplicantsLabel,
+                'submission_date'           => $this->submissionDate,
+                'request_date'              => $this->requestDate,
+                'brand_name'                => config('app.name'),
+                'app_settings'              => $appSettings,
+                'emailfooter'               => $pageLinks,
+                'signature'                 => $commSettings->email_signature ?? '',
             ]);
 
         // Attach (notifications support attachments via MailMessage->attach)

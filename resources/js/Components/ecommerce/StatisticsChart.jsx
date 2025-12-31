@@ -1,5 +1,6 @@
 import Chart from "react-apexcharts";
 import ChartTab from "../common/ChartTab";
+import ApexCharts from "apexcharts";
 
 export default function StatisticsChart() {
   const options = {

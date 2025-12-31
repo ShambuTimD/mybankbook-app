@@ -3,6 +3,7 @@ import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 // import  MoreDotIcon  from "@/icons/moredot.svg";
 import { useState } from "react";
+import ApexCharts from "apexcharts";
 
 export default function MonthlySalesChart() {
   const options = {

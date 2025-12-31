@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { useSidebar } from "../Context/SidebarContext";
-import { ThemeToggleButton } from "../Components/common/ThemeToggleButton";
+// import { ThemeToggleButton } from "../Components/common/ThemeToggleButton";
 import NotificationDropdown from "../Components/header/NotificationDropdown";
 import UserDropdown from "../Components/header/UserDropdown";
 
+
 const AppHeader = () => {
+
+  const { settings } = usePage().props;
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -86,12 +89,14 @@ const AppHeader = () => {
           <Link to="/" className="lg:hidden">
             <img width={100}
               className="dark:hidden"
-              src="https://www.timdtech.com/wp-content/uploads/2022/04/logo.png"
+              // src={settings.application_short_logo}
+              src=""
               alt="Logo"
             />
             <img width={100}
               className="hidden dark:block"
-              src="https://www.timdtech.com/wp-content/uploads/2022/04/logo.png"
+              // src={settings.application_short_logo}
+              src=""
               alt="Logo"
             />
           </Link>
@@ -116,7 +121,7 @@ const AppHeader = () => {
             </svg>
           </button>
 
-          <div className="hidden lg:block">
+          {/* <div className="hidden lg:block">
             <form>
               <div className="relative">
                 <span className="absolute -translate-y-1/2 pointer-events-none left-4 top-1/2">
@@ -149,7 +154,7 @@ const AppHeader = () => {
                 </button>
               </div>
             </form>
-          </div>
+          </div> */}
         </div>
         <div
           className={`${isApplicationMenuOpen ? "flex" : "hidden"
@@ -157,7 +162,7 @@ const AppHeader = () => {
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
             {/* <!-- Dark Mode Toggler --> */}
-            <ThemeToggleButton />
+            {/* <ThemeToggleButton /> */}
             {/* <!-- Dark Mode Toggler --> */}
             <NotificationDropdown />
             {/* <!-- Notification Menu Area --> */}

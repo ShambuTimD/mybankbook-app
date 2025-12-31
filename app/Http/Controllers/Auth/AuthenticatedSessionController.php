@@ -35,8 +35,24 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user(); // Authenticated user
+
+        // Check if the user has 'dashboard.view' permission
+        if ($user->roles()->where('role_name', 'super_admin')->exists() || $user->allPermissions()->contains('dashboard.view')) {
+            // ✅ User has permission
+            return redirect()->intended(route('dashboard.view'));
+        }
+
+        // ❌ User does not have permission
+        // Destroy session and logout
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirect to logic page (replace with actual route name or URL)
+        return redirect()->route('login')->withErrors(['unauthorized' => 'Access denied.']);
     }
+
 
     /**
      * Destroy an authenticated session.
@@ -49,7 +65,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 
 

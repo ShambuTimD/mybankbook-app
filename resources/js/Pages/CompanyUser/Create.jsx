@@ -3,6 +3,7 @@ import { useForm, Head } from "@inertiajs/react";
 import ComponentCard from "@/Components/common/ComponentCard";
 import Label from "@/Components/form/Label";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👈 eye icons
 import Select from "react-select"; // For multi-select dropdown
 
 export default function CreateCompanyUser({
@@ -34,6 +35,8 @@ export default function CreateCompanyUser({
   });
 
   const [selectedOffices, setSelectedOffices] = useState([]);
+  const [showPassword, setShowPassword] = useState(false); // 👈 toggle state
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -51,6 +54,14 @@ export default function CreateCompanyUser({
       setSelectedOffices([]);
       clearErrors("company_office_id");
     }
+    if (name === "role_id") {
+      const role = roles.find(r => String(r.id) === value);
+      if (role?.role_name?.toLowerCase() === "company_admin") {
+        setSelectedOffices([]);
+        setData("company_office_id", []);
+      }
+    }
+
   };
 
   const handleOfficeChange = (selectedOptions) => {
@@ -194,9 +205,8 @@ export default function CreateCompanyUser({
                   name="role_for"
                   value={data.role_for}
                   onChange={handleChange}
-                  className={`form-select w-full ${
-                    errors.role_for ? "border-red-500" : ""
-                  }`}
+                  className={`form-select w-full ${errors.role_for ? "border-red-500" : ""
+                    }`}
                 >
                   <option value="">-- Select Role For --</option>
                   <option value="backend">Backend</option>
@@ -216,9 +226,8 @@ export default function CreateCompanyUser({
                   name="role_id"
                   value={data.role_id}
                   onChange={handleChange}
-                  className={`form-select w-full ${
-                    errors.role_id ? "border-red-500" : ""
-                  }`}
+                  className={`form-select w-full ${errors.role_id ? "border-red-500" : ""
+                    }`}
                 >
                   <option value="">-- Select Role --</option>
                   {filteredRoles.map((role) => (
@@ -270,16 +279,15 @@ export default function CreateCompanyUser({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <Label htmlFor="company_id">
-                  Company {requireCompany && "*"}
+                  Company {requireCompany && <span className="text-red-500">*</span>}
                 </Label>
                 <select
                   id="company_id"
                   name="company_id"
                   value={data.company_id}
                   onChange={handleChange}
-                  className={`form-select w-full ${
-                    errors.company_id ? "border-red-500" : ""
-                  }`}
+                  className={`form-select w-full ${errors.company_id ? "border-red-500" : ""
+                    }`}
                   required={requireCompany}
                 >
                   <option value="">-- Select Company --</option>
@@ -294,8 +302,7 @@ export default function CreateCompanyUser({
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="company_office_id">
+              {/* <Label htmlFor="company_office_id">
                   Office
                 </Label>
                 <Select
@@ -319,7 +326,34 @@ export default function CreateCompanyUser({
                     {errors.company_office_id}
                   </p>
                 )}
-              </div>
+                </div> */}
+              {/* Office Section — hide completely when role = company_admin */}
+              {selectedRoleName !== "company_admin" && (
+                <div>
+                  <Label htmlFor="company_office_id">
+                    Office {requireOffice && <span className="text-red-500">*</span>}
+                  </Label>
+
+                  <Select
+                    id="company_office_id"
+                    name="company_office_id"
+                    value={selectedOffices}
+                    onChange={handleOfficeChange}
+                    options={filteredOffices.map((office) => ({
+                      value: office.id,
+                      label: office.office_name,
+                    }))}
+                    isMulti
+                    placeholder="-- Select Office(s) --"
+                    className={`${errors.company_office_id ? "border-red-500" : ""}`}
+                    isDisabled={!data.company_id} // only disabled if no company selected
+                  />
+
+                  {errors.company_office_id && (
+                    <p className="text-red-500 text-xs">{errors.company_office_id}</p>
+                  )}
+                </div>
+              )}
 
               <div>
                 <Label htmlFor="name">
@@ -330,9 +364,8 @@ export default function CreateCompanyUser({
                   name="name"
                   value={data.name}
                   onChange={handleChange}
-                  className={`form-input w-full ${
-                    errors.name ? "border-red-500" : ""
-                  }`}
+                  className={`form-input w-full ${errors.name ? "border-red-500" : ""
+                    }`}
                   placeholder="Enter full name"
                 />
                 {errors.name && (
@@ -350,9 +383,8 @@ export default function CreateCompanyUser({
                   type="email"
                   value={data.email}
                   onChange={handleChange}
-                  className={`form-input w-full ${
-                    errors.email ? "border-red-500" : ""
-                  }`}
+                  className={`form-input w-full ${errors.email ? "border-red-500" : ""
+                    }`}
                   placeholder="Enter email"
                 />
                 {errors.email && (
@@ -364,17 +396,24 @@ export default function CreateCompanyUser({
                 <Label htmlFor="password">
                   Password<span className="text-red-500">*</span>
                 </Label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={data.password}
-                  onChange={handleChange}
-                  className={`form-input w-full ${
-                    errors.password ? "border-red-500" : ""
-                  }`}
-                  placeholder="Enter password (min 6 chars)"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"} // 👈 toggle type
+                    value={data.password}
+                    onChange={handleChange}
+                    className={`form-input w-full pr-10 ${errors.password ? "border-red-500" : ""}`}
+                    placeholder="Enter password (min 6 chars)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-red-500 text-xs">{errors.password}</p>
                 )}
@@ -387,9 +426,8 @@ export default function CreateCompanyUser({
                   name="phone"
                   value={data.phone}
                   onChange={handleChange}
-                  className={`form-input w-full ${
-                    errors.phone ? "border-red-500" : ""
-                  }`}
+                  className={`form-input w-full ${errors.phone ? "border-red-500" : ""
+                    }`}
                   placeholder="Digits only"
                   inputMode="numeric"
                 />
@@ -407,9 +445,8 @@ export default function CreateCompanyUser({
                   name="status"
                   value={data.status}
                   onChange={handleChange}
-                  className={`form-select w-full ${
-                    errors.status ? "border-red-500" : ""
-                  }`}
+                  className={`form-select w-full ${errors.status ? "border-red-500" : ""
+                    }`}
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>

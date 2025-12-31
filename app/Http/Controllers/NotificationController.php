@@ -8,14 +8,14 @@ use Inertia\Inertia;
 
 class NotificationController extends Controller
 {
-    public function index()
+public function index()
 {
     $user = Auth::user();
 
-    $notifications = Notification::where(function ($q) use ($user) {
-            $q->where('user_id', $user->id)
-              ->orWhere('customer_id', $user->id);
-        })
+    // Temporary debug — remove this once tested
+    \Log::info('Notification Index', ['user_id' => $user->id]);
+
+    $notifications = Notification::query()
         ->orderBy('date_time', 'desc')
         ->paginate(10)
         ->through(function ($item) {
@@ -24,7 +24,7 @@ class NotificationController extends Controller
                 'message' => $item->message,
                 'long_content' => $item->long_content,
                 'is_read' => $item->is_read,
-                'date_time' => $item->date_time->diffForHumans(),
+                'date_time' => optional($item->date_time)->diffForHumans(),
             ];
         });
 
@@ -32,18 +32,35 @@ class NotificationController extends Controller
         'notifications' => $notifications,
     ]);
 }
+
+
+
     public function fetch()
-    {
-        $user = Auth::user();
+{
+    $notifications = Notification::orderBy('date_time', 'desc')
+        ->limit(10)
+        ->get(['id', 'message', 'long_content', 'is_read', 'date_time']);
 
-        $notifications = Notification::where(function ($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhere('customer_id', $user->id);
-            })
-            ->orderBy('date_time', 'desc')
-            ->limit(10)
-            ->get(['id', 'message', 'long_content', 'is_read', 'date_time']);
+    return response()->json($notifications);
+}
 
-        return response()->json($notifications);
+    public function markRead($id)
+{
+    $notification = \App\Models\Notification::find($id);
+
+    if ($notification && $notification->is_read === 'unread') {
+        $notification->update(['is_read' => 'read']);
     }
+
+    return back();
+}
+
+public function markAllRead()
+{
+    \App\Models\Notification::where('user_id', Auth::id())
+        ->where('is_read', 'unread')
+        ->update(['is_read' => 'read']);
+
+    return back();
+}
 }

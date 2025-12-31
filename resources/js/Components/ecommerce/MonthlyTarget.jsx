@@ -1,5 +1,7 @@
 import Chart from "react-apexcharts";
 import { useState } from "react";
+import ApexCharts from "apexcharts";
+
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 // import  MoreDotIcon  from "@/icons/moredot.svg";

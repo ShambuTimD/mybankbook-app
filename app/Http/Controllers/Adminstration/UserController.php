@@ -41,12 +41,12 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::where('is_active', 1)->get()->groupBy('role_for');
-        $customerRoleId = Role::where('name', 'Customer')->value('id');
+        // $customerRoleId = Role::where('name', 'Customer')->value('id');
 
 
         return Inertia::render('Adminstration/User/Create', [
             'rolesGrouped' => $roles,
-            'customerRoleId' => $customerRoleId,
+            // 'customerRoleId' => $customerRoleId,
         ]);
     }
 
@@ -85,7 +85,7 @@ class UserController extends Controller
 
     //         return redirect()->route('user.list')->with('success', 'User created successfully.');
     //     }
- 
+
 
 // public function store(Request $request)
 // {
@@ -250,7 +250,7 @@ class UserController extends Controller
         return Inertia::render('Adminstration/User/Edit', [
             'title' => $this->tilte,
             'user' => $user,
-             
+
         ]);
     }
 
@@ -263,12 +263,12 @@ class UserController extends Controller
 //             'name' => ['required', 'string', 'max:255'],
 //             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
 //             'password' => ['nullable', 'string', 'min:6', 'confirmed'],
-      
+
 //         ]);
 
 //         $user->name = $validated['name'];
 //         $user->email = $validated['email'];
-       
+
 
 //         if (!empty($validated['password'])) {
 //             $user->password = Hash::make($validated['password']);
@@ -285,14 +285,14 @@ class UserController extends Controller
         'name' => ['required', 'string', 'max:255'],
         'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
         'password' => ['nullable', 'string', 'min:6', 'confirmed'],
-        'role_id' => ['required', 'exists:roles,id'],
-        'type' => ['required', 'in:backend,store,warehouse'], // if you support more types
+        // 'role_id' => ['required', 'exists:roles,id'],
+        // 'type' => ['required', 'in:backend,store,warehouse'], // if you support more types
     ]);
 
     $user->name = $validated['name'];
     $user->email = $validated['email'];
-    $user->role_id = $validated['role_id'];
-    $user->type = $validated['type']; // fixed 'backend' comes from form
+    // $user->role_id = $validated['role_id'];
+    // $user->type = $validated['type']; // fixed 'backend' comes from form
 
     if (!empty($validated['password'])) {
         $user->password = Hash::make($validated['password']);

@@ -1,4 +1,3 @@
-// resources/js/Pages/Companies/Edit.jsx
 import { useForm, Head, router } from "@inertiajs/react";
 import ComponentCard from "@/Components/common/ComponentCard";
 import Label from "@/Components/form/Label";
@@ -14,6 +13,7 @@ export default function EditCompany({ company }) {
   const { data, setData, post, processing, errors, transform } = useForm({
     _method: "put", // important for PUT
     name: company?.name || "",
+    short_name: company?.short_name || "", // Add short_name to data
     email: company?.email || "",
     phone: company?.phone || "",
     alternate_phone: company?.alternate_phone || "",
@@ -38,10 +38,10 @@ export default function EditCompany({ company }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-     if (!data.name || !data.phone || !data.email || !data.address_line_1 || !data.city || !data.state || !data.country || !data.pincode) {
-            alert("Please fill all required fields");
-            return;
-     }
+    if (!data.name || !data.short_name || !data.status) {
+      alert("Please fill all required fields");
+      return;
+    }
     router.post(route("companies.update", company.id), data, {
       preserveScroll: true,
       forceFormData: true,
@@ -68,7 +68,7 @@ export default function EditCompany({ company }) {
         urlIcon={faArrowLeft}
       >
         <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
-          {/* Name */}
+          {/* Company Name */}
           <div>
             <Label htmlFor="name">
               Company Name<span className="text-red-500">*</span>
@@ -82,10 +82,26 @@ export default function EditCompany({ company }) {
             {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
           </div>
 
+          {/* Short Name */}
+          <div>
+            <Label htmlFor="short_name">
+              Short Name<span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="short_name"
+              value={data.short_name}
+              onChange={(e) => setData("short_name", e.target.value)}
+              placeholder="Enter short company name"
+            />
+            {errors.short_name && (
+              <p className="text-red-500 text-xs">{errors.short_name}</p>
+            )}
+          </div>
+
           {/* Email */}
           <div>
             <Label htmlFor="email">
-              Email<span className="text-red-500">*</span>
+              Email
             </Label>
             <Input
               id="email"
@@ -100,7 +116,7 @@ export default function EditCompany({ company }) {
           {/* Phone */}
           <div>
             <Label htmlFor="phone">
-              Phone<span className="text-red-500">*</span>
+              Phone
             </Label>
             <Input
               id="phone"
@@ -222,7 +238,7 @@ export default function EditCompany({ company }) {
           {/* Address Line 1 */}
           <div>
             <Label htmlFor="address_line_1">
-              Address Line 1<span className="text-red-500">*</span>
+              Address Line 1
             </Label>
             <Input
               id="address_line_1"
@@ -251,7 +267,7 @@ export default function EditCompany({ company }) {
 
           {/* City */}
           <div>
-            <Label htmlFor="city">City<span className="text-red-500">*</span></Label>
+            <Label htmlFor="city">City</Label>
             <Input
               id="city"
               value={data.city}
@@ -263,7 +279,7 @@ export default function EditCompany({ company }) {
 
           {/* State */}
           <div>
-            <Label htmlFor="state">State<span className="text-red-500">*</span></Label>
+            <Label htmlFor="state">State</Label>
             <Input
               id="state"
               value={data.state}
@@ -275,7 +291,7 @@ export default function EditCompany({ company }) {
 
           {/* Country */}
           <div>
-            <Label htmlFor="country">Country<span className="text-red-500">*</span></Label>
+            <Label htmlFor="country">Country</Label>
             <Input
               id="country"
               value={data.country}
@@ -289,7 +305,7 @@ export default function EditCompany({ company }) {
 
           {/* Pincode */}
           <div>
-            <Label htmlFor="pincode">Pincode<span className="text-red-500">*</span></Label>
+            <Label htmlFor="pincode">Pincode</Label>
             <Input
               id="pincode"
               value={data.pincode}

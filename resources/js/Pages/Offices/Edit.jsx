@@ -5,267 +5,346 @@ import PageBreadcrumb from "@/Components/common/PageBreadCrumb";
 import ComponentCard from "@/Components/common/ComponentCard";
 
 export default function EditOffice({ office, companies }) {
-  const {
-    data,
-    setData,
-    put,
-    processing,
-    errors,
-    setError,
-    clearErrors,
-  } = useForm({
-    company_id: office?.company_id ?? "",
-    office_name: office?.office_name ?? "",
-    address_line_1: office?.address_line_1 ?? "",
-    address_line_2: office?.address_line_2 ?? "",
-    city: office?.city ?? "",
-    state: office?.state ?? "",
-    country: office?.country ?? "",
-    pincode: office?.pincode ?? "",
-    status: office?.status ?? "active",
-  });
+    const { data, setData, put, processing, errors, setError, clearErrors } =
+        useForm({
+            company_id: office?.company_id ?? "",
+            office_name: office?.office_name ?? "",
+            address_line_1: office?.address_line_1 ?? "",
+            address_line_2: office?.address_line_2 ?? "",
+            city: office?.city ?? "",
+            state: office?.state ?? "",
+            country: office?.country ?? "",
+            pincode: office?.pincode ?? "",
+            status: office?.status ?? "active",
+            allowed_collection_mode: office?.allowed_collection_mode
+                ? office.allowed_collection_mode.split(",") // Split comma-separated values into an array
+                : [], // If no allowed collection mode, set as empty array
+        });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setData(name, value);
-    // clear the inline error for the field once user edits it
-    if (errors[name]) clearErrors(name);
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+        // Handle multiple selection for checkboxes
+        if (name === "allowed_collection_mode") {
+            const updatedCollectionMode = [...data.allowed_collection_mode];
+            if (e.target.checked) {
+                updatedCollectionMode.push(value);
+            } else {
+                const index = updatedCollectionMode.indexOf(value);
+                if (index > -1) {
+                    updatedCollectionMode.splice(index, 1);
+                }
+            }
+            setData("allowed_collection_mode", updatedCollectionMode);
+        } else {
+            setData(name, value);
+        }
 
-    // Map of required keys -> human labels
-    const required = {
-      company_id: "Company",
-      office_name: "Office Name",
-      address_line_1: "Address Line 1",
-      status: "Status",
+        // clear the inline error for the field once user edits it
+        if (errors[name]) clearErrors(name);
     };
 
-    // Find missing fields
-    const missing = Object.entries(required)
-      .filter(([k]) => !data[k] || data[k].toString().trim() === "")
-      .map(([k, label]) => ({ key: k, label }));
+    const handleSubmit = (e) => {
+        e.preventDefault();
 
-    // Show alert + set inline errors if any required field is missing
-    if (missing.length) {
-      // set inline errors
-      missing.forEach(({ key, label }) =>
-        setError(key, `${label} is required.`)
-      );
-      // alert list
-      alert(
-        "Please fill the following fields:\n" +
-          missing.map((m) => m.label).join("\n")
-      );
-      return;
-    }
+        // Map of required keys -> human labels
+        const required = {
+            company_id: "Company",
+            office_name: "Office Name",
+            status: "Status",
+        };
 
-    // Submit with PUT to companyOffice.update
-    put(route("companyOffice.update", office.id), {
-      preserveScroll: true,
-    });
-  };
+        // Find missing fields
+        const missing = Object.entries(required)
+            .filter(([k]) => !data[k] || data[k].toString().trim() === "")
+            .map(([k, label]) => ({ key: k, label }));
 
-  return (
-    <>
-      <Head title="Edit Company Office" />
-      <PageBreadcrumb pageTitle="Edit Company Office" />
-      <ComponentCard title="Edit Office">
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          {/* Company */}
-          <div>
-            <label className="block font-semibold mb-1">
-              Company <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="company_id"
-              value={data.company_id}
-              onChange={handleChange}
-              className={`form-select w-full ${
-                errors.company_id ? "border-red-500" : ""
-              }`}
-            >
-              <option value="">-- Select Company --</option>
-              {companies.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            {errors.company_id && (
-              <p className="text-sm text-red-500 mt-1">{errors.company_id}</p>
-            )}
-          </div>
+        // Show alert + set inline errors if any required field is missing
+        if (missing.length) {
+            // set inline errors
+            missing.forEach(({ key, label }) =>
+                setError(key, `${label} is required.`)
+            );
+            // alert list
+            alert(
+                "Please fill the following fields:\n" +
+                    missing.map((m) => m.label).join("\n")
+            );
+            return;
+        }
 
-          {/* Office Name */}
-          <div>
-            <label className="block font-semibold mb-1">
-              Office Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="office_name"
-              value={data.office_name}
-              onChange={handleChange}
-              className={`form-input w-full ${
-                errors.office_name ? "border-red-500" : ""
-              }`}
-              placeholder="e.g., Head Office"
-            />
-            {errors.office_name && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.office_name}
-              </p>
-            )}
-          </div>
+        // Log the data before submitting
+        console.log("Submitting data:", data);
+        // return
 
-          {/* Address Line 1 */}
-          <div>
-            <label className="block font-semibold mb-1">
-              Address Line 1 <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="address_line_1"
-              value={data.address_line_1}
-              onChange={handleChange}
-              className={`form-input w-full ${
-                errors.address_line_1 ? "border-red-500" : ""
-              }`}
-              placeholder="Street, Area"
-            />
-            {errors.address_line_1 && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.address_line_1}
-              </p>
-            )}
-          </div>
+        // Submit with PUT to companyOffice.update
+        put(route("companyOffice.update", office.id), {
+            preserveScroll: true,
+            onFinish: (response) => {
+                // Log the submission response
+                console.log("Submission response:", response);
 
-          {/* Address Line 2 */}
-          <div>
-            <label className="block font-semibold mb-1">Address Line 2</label>
-            <input
-              type="text"
-              name="address_line_2"
-              value={data.address_line_2}
-              onChange={handleChange}
-              className="form-input w-full"
-              placeholder="Building, Landmark"
-            />
-            {errors.address_line_2 && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.address_line_2}
-              </p>
-            )}
-          </div>
+                // You can also handle the response here (e.g., showing a success message or error)
+            },
+        });
+    };
 
-          {/* City */}
-          <div>
-            <label className="block font-semibold mb-1">City</label>
-            <input
-              type="text"
-              name="city"
-              value={data.city}
-              onChange={handleChange}
-              className={`form-input w-full ${
-                errors.city ? "border-red-500" : ""
-              }`}
-            />
-            {errors.city && (
-              <p className="text-sm text-red-500 mt-1">{errors.city}</p>
-            )}
-          </div>
+    return (
+        <>
+            <Head title="Edit Company Office" />
+            <PageBreadcrumb pageTitle="Edit Company Office" />
+            <ComponentCard title="Edit Office">
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                >
+                    {/* Company */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            Company <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            name="company_id"
+                            value={data.company_id}
+                            onChange={handleChange}
+                            className={`form-select w-full ${
+                                errors.company_id ? "border-red-500" : ""
+                            }`}
+                        >
+                            <option value="">-- Select Company --</option>
+                            {companies.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {c.name}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.company_id && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.company_id}
+                            </p>
+                        )}
+                    </div>
 
-          {/* State */}
-          <div>
-            <label className="block font-semibold mb-1">State</label>
-            <input
-              type="text"
-              name="state"
-              value={data.state}
-              onChange={handleChange}
-              className={`form-input w-full ${
-                errors.state ? "border-red-500" : ""
-              }`}
-            />
-            {errors.state && (
-              <p className="text-sm text-red-500 mt-1">{errors.state}</p>
-            )}
-          </div>
+                    {/* Office Name */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            Office Name <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="office_name"
+                            value={data.office_name}
+                            onChange={handleChange}
+                            className={`form-input w-full ${
+                                errors.office_name ? "border-red-500" : ""
+                            }`}
+                            placeholder="e.g., Head Office"
+                        />
+                        {errors.office_name && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.office_name}
+                            </p>
+                        )}
+                    </div>
 
-          {/* Country */}
-          <div>
-            <label className="block font-semibold mb-1">Country</label>
-            <input
-              type="text"
-              name="country"
-              value={data.country}
-              onChange={handleChange}
-              className={`form-input w-full ${
-                errors.country ? "border-red-500" : ""
-              }`}
-            />
-            {errors.country && (
-              <p className="text-sm text-red-500 mt-1">{errors.country}</p>
-            )}
-          </div>
+                    {/* Address Line 1 */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            Address Line 1
+                        </label>
+                        <input
+                            type="text"
+                            name="address_line_1"
+                            value={data.address_line_1}
+                            onChange={handleChange}
+                            className={`form-input w-full ${
+                                errors.address_line_1 ? "border-red-500" : ""
+                            }`}
+                        />
+                        {errors.address_line_1 && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.address_line_1}
+                            </p>
+                        )}
+                    </div>
 
-          {/* Pincode */}
-          <div>
-            <label className="block font-semibold mb-1">Pincode</label>
-            <input
-              type="text"
-              name="pincode"
-              value={data.pincode}
-              onChange={handleChange}
-              className={`form-input w-full ${
-                errors.pincode ? "border-red-500" : ""
-              }`}
-              inputMode="numeric"
-            />
-            {errors.pincode && (
-              <p className="text-sm text-red-500 mt-1">{errors.pincode}</p>
-            )}
-          </div>
+                    {/* Address Line 2 */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            Address Line 2
+                        </label>
+                        <input
+                            type="text"
+                            name="address_line_2"
+                            value={data.address_line_2}
+                            onChange={handleChange}
+                            className="form-input w-full"
+                        />
+                        {errors.address_line_2 && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.address_line_2}
+                            </p>
+                        )}
+                    </div>
 
-          {/* Status */}
-          <div>
-            <label className="block font-semibold mb-1">
-              Status <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="status"
-              value={data.status}
-              onChange={handleChange}
-              className={`form-select w-full ${
-                errors.status ? "border-red-500" : ""
-              }`}
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-            {errors.status && (
-              <p className="text-sm text-red-500 mt-1">{errors.status}</p>
-            )}
-          </div>
+                    {/* City */}
+                    <div>
+                        <label className="block font-semibold mb-1">City</label>
+                        <input
+                            type="text"
+                            name="city"
+                            value={data.city}
+                            onChange={handleChange}
+                            className={`form-input w-full ${
+                                errors.city ? "border-red-500" : ""
+                            }`}
+                        />
+                        {errors.city && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.city}
+                            </p>
+                        )}
+                    </div>
 
-          {/* Submit */}
-          <div className="md:col-span-2">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-200"
-              disabled={processing}
-            >
-              {processing ? "Updating..." : "Update Office"}
-            </button>
-          </div>
-        </form>
-      </ComponentCard>
-    </>
-  );
+                    {/* State */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            State
+                        </label>
+                        <input
+                            type="text"
+                            name="state"
+                            value={data.state}
+                            onChange={handleChange}
+                            className={`form-input w-full ${
+                                errors.state ? "border-red-500" : ""
+                            }`}
+                        />
+                        {errors.state && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.state}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Country */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            Country
+                        </label>
+                        <input
+                            type="text"
+                            name="country"
+                            value={data.country}
+                            onChange={handleChange}
+                            className={`form-input w-full ${
+                                errors.country ? "border-red-500" : ""
+                            }`}
+                        />
+                        {errors.country && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.country}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Pincode */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            Pincode
+                        </label>
+                        <input
+                            type="text"
+                            name="pincode"
+                            value={data.pincode}
+                            onChange={handleChange}
+                            className={`form-input w-full ${
+                                errors.pincode ? "border-red-500" : ""
+                            }`}
+                            inputMode="numeric"
+                        />
+                        {errors.pincode && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.pincode}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Status */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            Status <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            name="status"
+                            value={data.status}
+                            onChange={handleChange}
+                            className={`form-select w-full ${
+                                errors.status ? "border-red-500" : ""
+                            }`}
+                        >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        {errors.status && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.status}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Collection Mode */}
+                    <div>
+                        <label className="block font-semibold mb-1">
+                            Collection Mode
+                        </label>
+                        <div className="flex space-x-4">
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    name="allowed_collection_mode"
+                                    value="at_home"
+                                    checked={data.allowed_collection_mode.includes(
+                                        "at_home"
+                                    )}
+                                    onChange={handleChange}
+                                    className="form-checkbox"
+                                />
+                                <label className="ml-2">At Home</label>
+                            </div>
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    name="allowed_collection_mode"
+                                    value="at_clinic"
+                                    checked={data.allowed_collection_mode.includes(
+                                        "at_clinic"
+                                    )}
+                                    onChange={handleChange}
+                                    className="form-checkbox"
+                                />
+                                <label className="ml-2">At Clinic</label>
+                            </div>
+                        </div>
+                        {errors.allowed_collection_mode && (
+                            <p className="text-sm text-red-500 mt-1">
+                                {errors.allowed_collection_mode}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Submit */}
+                    <div className="md:col-span-2">
+                        <button
+                            type="submit"
+                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-200"
+                            disabled={processing}
+                        >
+                            {processing ? "Updating..." : "Update Office"}
+                        </button>
+                    </div>
+                </form>
+            </ComponentCard>
+        </>
+    );
 }

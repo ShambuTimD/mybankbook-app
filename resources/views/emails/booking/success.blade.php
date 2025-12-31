@@ -80,21 +80,23 @@
 
         <!-- Content -->
         <div class="email-content">
-        <p>Dear {{ $user_full_name }},</p>
+            <p>Dear {{ $user_full_name }},</p>
 
-            <p>Your booking for the <strong>{{ $app_settings->company_short_name }} -
+            <p>Your booking for <strong>{{ $app_settings->company_short_name }} -
                     {{ $app_settings->application_name }}</strong> has been successfully submitted. One of our support
-                executives will contact you shortly to provide more details about your booking.</p>
+                executives will contact you shortly to provide more details.</p>
 
             <p><strong>Booking Details:</strong></p>
             <ul>
                 <li><strong>Booking Reference No:</strong> {{ $booking_ref_no }}</li>
-                <li><strong>Booking Status:</strong> Success - {{ \Illuminate\Support\Str::ucfirst($booking_status) }}</li>
+                <li><strong>Booking Status:</strong> Success - {{ \Illuminate\Support\Str::ucfirst($booking_status) }}
+                </li>
                 {{-- <li><strong>Request Date:</strong> ({{ $request_date }})->format('d M Y, h:i A')</li> --}}
                 <li><strong>Appointment Request Date:</strong>
                     {{ \Carbon\Carbon::parse($request_date)->format('d M Y') }}</li>
                 <li><strong>Company:</strong> {{ $company_name }} </li>
-                <li><strong>Office/Center/Unit:</strong> {{ $office_name }}</li>
+                <li><strong>Office/Center/Unit:</strong> {{ $office_name }} - {{ $office_address }}</li>
+                <li><strong>Preferred Collection Type:</strong> {{ $pref_collection_mode }}</li>
                 <li><strong>Total Applicants:</strong> {{ $total_applicants }}</li>
                 <li><strong>Submitted By:</strong> {{ $user_full_name }} | {{ $user_phone }} | {{ $user_email }}
                 </li>
@@ -102,7 +104,6 @@
 
             </ul>
 
-            <p>You will find attached a copy of the submitted data in Excel format for your records.</p>
 
             <p>Thank you for using our Corporate Wellness Care Booking System.</p>
 
@@ -113,8 +114,8 @@
                 <p class = "signature"><strong>Best Regards,</strong>
                     <br>
                     <strong>{{ $signature }}</strong>
-                    <br>
-                    <strong>{{ $app_settings->company_name }}</strong>
+                    {{-- <br> --}}
+                    {{-- <strong>{{ $app_settings->company_n1ame }}</strong> --}}
                 </p>
             @endif
         </div>

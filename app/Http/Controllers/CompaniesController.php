@@ -14,7 +14,7 @@ class CompaniesController extends Controller
     public function index()
     {
         return Inertia::render('Companies/Index', [
-            'title' => 'Company'
+            
         ]);
     }
 

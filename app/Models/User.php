@@ -58,8 +58,29 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id');
     }
+
+    public function backendroles()
+    {
+        return $this->belongsToMany(Role::class, 'user_roles', 'user_id', 'role_id')
+            ->where('role_for', 'backend');
+    }
+
     public function address()
     {
         return $this->hasOne(UserAddress::class);
+    }
+
+    public function allPermissions()
+    {
+        return $this->backendroles()
+            ->with(['permissions' => function ($q) {
+                $q->where('is_active', 1);
+            }])
+            ->get(['roles.id', 'roles.role_name', 'roles.role_title', 'roles.role_for'])
+            ->pluck('permissions')      // Collection<Collection<Permission>>
+            ->flatten()                 // Collection<Permission>
+            ->pluck('name')             // Collection<string>
+            ->unique()
+            ->values();                 // clean 0..N indexing
     }
 }

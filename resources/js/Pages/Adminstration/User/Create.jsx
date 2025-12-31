@@ -87,7 +87,7 @@ export default function CreateUser({ rolesGrouped }) {
               <option value="">Select Role</option>
               {currentRoles.map((role) => (
                 <option key={role.id} value={role.id}>
-                  {role.name}
+                  {role.role_title}
                 </option>
               ))}
             </select>

@@ -12,6 +12,7 @@ use Inertia\Inertia;
 use Yajra\DataTables\DataTables;
 use App\Models\Permission;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -51,20 +52,31 @@ class RoleController extends Controller
      */
     public function store(RoleRequest $request)
     {
-        try {
-            $data =  Role::create($request->except('_token'));
+        DB::beginTransaction();
 
-            for ($i = 0; $i < count($request->permission); $i++) {
+        try {
+            // Find existing role
+            $role = Role::where('role_for', $request->role_for)
+                ->where('role_name', $request->role_name)
+                ->firstOrFail();
+
+            // Remove existing permissions
+            Permission::where('role_id', $role->id)->delete();
+
+            // Insert new permissions
+            foreach ($request->permission as $perm) {
                 Permission::create([
-                    'role_id' => $data->id,
-                    'name' => $request->permission[$i],
-                    'created_by' => $request->user()->id
+                    'role_id'    => $role->id,
+                    'name'       => $perm,
+                    'created_by' => $request->user()->id,
                 ]);
             }
+
+            DB::commit();
             return Inertia::location(route('role.list'));
         } catch (Exception $e) {
-            Role::delete($data->id);
-            return response()->json(['error' => $e->getMessage()]);
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -78,7 +90,7 @@ class RoleController extends Controller
         return Inertia::render('Adminstration/Role/EditRole', [
             'page' => $this->title,
             'permissions' => AuthPermission::getRoutePermission(),
-            'data' => $role->only(['id', 'name', 'role_for']) + [
+            'data' => $role->only(['id', 'role_name', 'role_title', 'role_for']) + [
                 'current_permissions' => $role->permissions->pluck('name'),
             ],
         ]);
@@ -89,21 +101,47 @@ class RoleController extends Controller
      */
     public function update(RoleUpdateRequst $request, Role $role)
     {
-
+        DB::beginTransaction();
 
         try {
-            $role->update($request->except(['_token', '_method', 'permission']));
-            Permission::where('role_id', $role->id)->delete();
-            for ($i = 0; $i < count($request->permission); $i++) {
+            // Collect requested permissions
+            $newPerms = collect($request->permission);
+
+            // Get existing permissions in DB
+            $oldPerms = $role->permissions()->pluck('name');
+
+            // Find which to add
+            $toAdd = $newPerms->diff($oldPerms);
+
+            // Find which to remove
+            $toRemove = $oldPerms->diff($newPerms);
+
+            // Remove unchecked permissions
+            if ($toRemove->isNotEmpty()) {
+                Permission::where('role_id', $role->id)
+                    ->whereIn('name', $toRemove)
+                    ->delete();
+            }
+
+            // Add new permissions
+            foreach ($toAdd as $perm) {
                 Permission::create([
-                    'role_id' => $role->id,
-                    'name' => $request->permission[$i],
-                    'created_by' => $request->user()->id
+                    'role_id'    => $role->id,
+                    'name'       => $perm,
+                    'created_by' => $request->user()->id,
                 ]);
             }
-            return redirect()->route('role.list')->with('success', 'Role updated successfully.');
+
+            DB::commit();
+
+            return redirect()
+                ->route('role.list')
+                ->with('success', 'Permissions updated successfully for role: ' . $role->role_title);
         } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Failed to update role: ' . $e->getMessage());
+            DB::rollBack();
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to update permissions: ' . $e->getMessage());
         }
     }
 

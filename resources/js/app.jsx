@@ -3,7 +3,7 @@ import 'datatables.net-responsive-dt';
 import 'datatables.net-select-dt';
 import './bootstrap';
 
-import { StrictMode } from "react";
+import { StrictMode, useEffect } from "react";
 import { createInertiaApp } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
 import { AppWrapper } from "./Components/common/PageMeta.jsx";
@@ -11,8 +11,22 @@ import { ThemeProvider } from "./Context/ThemeContext.jsx";
 import AppLayout from "./Layout/AppLayout";
 import { Toaster } from 'react-hot-toast';
 
-
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+// --- Create a component to load reCAPTCHA globally ---
+function RecaptchaLoader() {
+  useEffect(() => {
+    if (!window.grecaptcha) {
+      const script = document.createElement("script");
+      script.src = `https://www.google.com/recaptcha/api.js?render=${import.meta.env.VITE_RECAPTCHA_SITE_KEY}`;
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  return null; // no UI needed
+}
 
 createInertiaApp({
   title: (title) => `${title} - ${appName}`,
@@ -28,15 +42,12 @@ createInertiaApp({
     const module = await page();
     const Component = module.default;
 
-    // ✅ Respect per-page layout overrides
     if (typeof Component.layout === 'undefined') {
-      // Default to AppLayout if layout not defined
       Component.layout = (page) => {
         const user = page?.props?.auth?.user;
         return user ? <AppLayout>{page}</AppLayout> : page;
       };
     } else if (Component.layout === null) {
-      // If explicitly set to null, use no layout
       Component.layout = (page) => page;
     }
 
@@ -51,6 +62,7 @@ createInertiaApp({
         <ThemeProvider>
           <AppWrapper>
             <Toaster position="top-center" toastOptions={{ className: 'mt-3' }} />
+            <RecaptchaLoader /> {/* <-- Load reCAPTCHA */}
             <App {...props} />
           </AppWrapper>
         </ThemeProvider>

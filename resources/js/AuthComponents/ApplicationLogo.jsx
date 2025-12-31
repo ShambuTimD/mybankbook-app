@@ -1,5 +1,9 @@
+import {usePage} from '@inertiajs/react'
+
 export default function ApplicationLogo(props) {
+      const { settings } = usePage().props;
+
     return (
-        <img width="200px" src="https://www.timdtech.com/wp-content/uploads/2022/04/logo.png" alt="" />
+        <img width="200px" src={settings.app_settings.application_short_logo} alt="" />
     );
 }
