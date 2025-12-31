@@ -1,0 +1,126 @@
+{
+  "application_details": {
+    "app_short_name": "TimD HR Booking System",
+    "app_login_name": "TimD - Tim Digital",
+    "app_version": "1.0.0",
+    "app_website": "https://www.timdtech.com",
+    "app_support_email": "",
+    "app_release_date": "2023-09-01",
+    "app_description": "A self-service HR application for corporate health check package bookings."
+  },
+  "brand_details": {
+    "id": 1,
+    "name": "KorpHeal Services LLP",
+    "support_email": "support@korpheal.com",
+    "logo": "https://www.korpheal.com/logo.png",
+    "fav_logo": "https://www.korpheal.com/favicon.ico"
+  },
+  "companies": [
+    {
+      "company_id": 1,
+      "company_name": "TimD",
+      "status": "active",
+      "hr_email": "hr@timd.com",
+      "hr_password": "timdHRpass123",
+      "offices": [
+        {
+          "office_id": 1,
+          "office_name": "Head Office",
+          "status": "active",
+          "users": [
+            {
+              "user_id": 1,
+              "user_name": "John Doe",
+              "user_role": "admin",
+              "email": "john.doe.admin@timd.com",
+              "password": "johnadminpass",
+              "company_id": 1,
+              "office_id": null,
+              "status": "active"
+            },
+            {
+              "user_id": 2,
+              "user_name": "Jane Smith",
+              "user_role": "executive",
+              "email": "jane.smith.executive@timd.com",
+              "password": "janeexecpass",
+              "company_id": 1,
+              "office_id": 1,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "office_id": 2,
+          "office_name": "Branch Office",
+          "status": "active",
+          "users": [
+            {
+              "user_id": 3,
+              "user_name": "Ankit Kumar",
+              "user_role": "executive",
+              "email": "ankit.kumar.executive@timd.com",
+              "password": "ankitexecpass",
+              "company_id": 1,
+              "office_id": 2,
+              "status": "active"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "company_id": 2,
+      "company_name": "TimDigital",
+      "status": "active",
+      "hr_email": "hr@timdigital.com",
+      "hr_password": "timdigitalHRpass123",
+      "offices": [
+        {
+          "office_id": 3,
+          "office_name": "Tech Hub",
+          "status": "active",
+          "users": [
+            {
+              "user_id": 4,
+              "user_name": "Raj Patel",
+              "user_role": "admin",
+              "email": "raj.patel.admin@timdigital.com",
+              "password": "rajadminpass",
+              "company_id": 2,
+              "office_id": null,
+              "status": "active"
+            },
+            {
+              "user_id": 5,
+              "user_name": "Rina Desai",
+              "user_role": "executive",
+              "email": "rina.desai.executive@timdigital.com",
+              "password": "rinaexecpass",
+              "company_id": 2,
+              "office_id": 3,
+              "status": "active"
+            }
+          ]
+        },
+        {
+          "office_id": 4,
+          "office_name": "Design Center",
+          "status": "active",
+          "users": [
+            {
+              "user_id": 6,
+              "user_name": "Sandeep Kumar",
+              "user_role": "executive",
+              "email": "sandeep.kumar.executive@timdigital.com",
+              "password": "sandeepexecpass",
+              "company_id": 2,
+              "office_id": 4,
+              "status": "active"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

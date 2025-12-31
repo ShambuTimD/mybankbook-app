@@ -1,0 +1,21 @@
+{
+  "company_name": "KorpHeal Pvt Ltd",
+  "application_name": "Health App Boo",
+  "hr_email": "hr@korpheal.com",
+  "hr_password": "securepass123",
+  "offices": [
+    "Kolkata HQ",
+    "Mumbai Branch",
+    "Bangalore Center",
+    "Hyderabad Hub"
+  ],
+  "hr_details": {
+    "name": "John Doe",
+    "email": "hr@korpheal.com",
+    "phone": "+91-9876543210",
+    "empid": "CPH123",
+    "designation": "HR",
+    "profile_image": "https://api.dicebear.com/7.x/initials/svg?seed=JohnDoe"
+  }
+  
+}
